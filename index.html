@@ -1,0 +1,2010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central Indiana SBDC - Biomedical & Healthcare Supply Chain Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        purdueGold: '#CFB991',
+                        purdueGoldDark: '#C28E0E',
+                        purdueGoldLight: '#DFD0B8',
+                        purdueBlack: '#000000',
+                        charcoal: '#1A1A1A',
+                        slateCard: '#0F172A',
+                        goldAccent: '#D3A13B',
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* CSS Variables for Dark / Light Mode */
+        :root {
+            --bg-body: #F8F9FA;
+            --bg-card: #FFFFFF;
+            --bg-card-hover: #F8F9FA;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --bg-input: #FFFFFF;
+            --bg-header: #0F172A;
+            --tab-bg: #FFFFFF;
+            --tab-border: #E2E8F0;
+            --table-header: #F8F9FA;
+            --table-row-hover: #F1F5F9;
+        }
+
+        body.dark-theme {
+            --bg-body: #0B0F19;
+            --bg-card: #151F32;
+            --bg-card-hover: #1E293B;
+            --text-main: #F1F5F9;
+            --text-muted: #94A3B8;
+            --border-color: #1E293B;
+            --bg-input: #0F172A;
+            --bg-header: #020617;
+            --tab-bg: #151F32;
+            --tab-border: #1E293B;
+            --table-header: #0F172A;
+            --table-row-hover: #1E293B;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-card {
+            background-color: var(--bg-card);
+            border-color: var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .theme-card:hover {
+            background-color: var(--bg-card-hover);
+        }
+        .theme-text-muted {
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+        .theme-border {
+            border-color: var(--border-color);
+            transition: border-color 0.3s ease;
+        }
+        .theme-input {
+            background-color: var(--bg-input);
+            border-color: var(--border-color);
+            color: var(--text-main);
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        .theme-table-header {
+            background-color: var(--table-header);
+            color: var(--text-main);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .theme-table-row {
+            transition: background-color 0.2s ease;
+        }
+        .theme-table-row:hover {
+            background-color: var(--table-row-hover);
+        }
+
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: #F1F1F1;
+            border-radius: 4px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: #CFB991;
+            border-radius: 4px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+            background: #C28E0E;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-active {
+            border-bottom: 3px solid #C28E0E;
+            color: #C28E0E !important;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col animate-fade-in">
+
+    <!-- Header Section -->
+    <header class="text-white shadow-md border-b-4 border-purdueGoldDark" style="background-color: var(--bg-header); transition: background-color 0.3s ease;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex items-center space-x-4">
+                <div class="bg-purdueGoldDark text-slate-900 p-3 rounded-lg shadow-inner flex items-center justify-center">
+                    <i class="fa-solid fa-house-medical-flag text-2xl"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs font-bold tracking-widest text-purdueGold uppercase">Indiana SBDC Network</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">Active Analysis</span>
+                    </div>
+                    <h1 class="text-2xl font-bold tracking-tight">Central Indiana SBDC</h1>
+                    <p class="text-sm text-slate-400 font-medium">Biomedical, Biotechnical & Healthcare Cluster Supply Chain Dashboard</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-lg px-4 py-2 text-right">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase">Cluster Sourcing Gaps</p>
+                    <p class="text-lg font-extrabold text-red-400">$5.36B <span class="text-xs font-normal text-slate-400">(39.1%)</span></p>
+                </div>
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-lg px-4 py-2 text-right">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase">Local Sourcing Volume</p>
+                    <p class="text-lg font-extrabold text-emerald-400">$8.34B <span class="text-xs font-normal text-slate-400">(60.9%)</span></p>
+                </div>
+                
+                <!-- Dark / Light Theme Toggle Button -->
+                <button id="theme-toggle-btn" onclick="toggleTheme()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-semibold py-2 px-4 rounded-lg text-sm transition-all flex items-center space-x-2">
+                    <i class="fa-solid fa-moon text-lg"></i>
+                    <span>Dark Mode</span>
+                </button>
+
+                <button onclick="resetDashboard()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-semibold py-2 px-4 rounded-lg text-sm transition-all flex items-center space-x-2" title="Reset Dashboard">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>Reset</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Navigation Tabs -->
+    <div class="border-b shadow-sm sticky top-0 z-30" style="background-color: var(--tab-bg); border-color: var(--tab-border); transition: background-color 0.3s ease, border-color 0.3s ease;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8 -mb-px overflow-x-auto scrollbar-custom">
+                <button onclick="switchTab('overview')" id="tab-overview" class="tab-active py-4 px-1 border-b-2 border-transparent text-sm font-medium whitespace-nowrap flex items-center space-x-2 theme-text-muted hover:text-slate-900 transition-all">
+                    <i class="fa-solid fa-chart-line text-lg"></i>
+                    <span>Executive Overview</span>
+                </button>
+                <button onclick="switchTab('opportunity')" id="tab-opportunity" class="py-4 px-1 border-b-2 border-transparent text-sm font-medium whitespace-nowrap flex items-center space-x-2 theme-text-muted hover:text-slate-900 transition-all">
+                    <i class="fa-solid fa-compass text-lg"></i>
+                    <span>Sourcing Gaps Map</span>
+                </button>
+                <button onclick="switchTab('drilldown')" id="tab-drilldown" class="py-4 px-1 border-b-2 border-transparent text-sm font-medium whitespace-nowrap flex items-center space-x-2 theme-text-muted hover:text-slate-900 transition-all">
+                    <i class="fa-solid fa-circle-info text-lg"></i>
+                    <span>Sector Deep-Dive</span>
+                </button>
+                <button onclick="switchTab('directory')" id="tab-directory" class="py-4 px-1 border-b-2 border-transparent text-sm font-medium whitespace-nowrap flex items-center space-x-2 theme-text-muted hover:text-slate-900 transition-all">
+                    <i class="fa-solid fa-table-list text-lg"></i>
+                    <span>Sectors Directory <span id="sectors-badge-count" class="ml-1.5 px-2 py-0.5 text-xs font-bold bg-slate-100 text-slate-600 rounded-full border border-slate-200">45</span></span>
+                </button>
+                <button onclick="switchTab('calculator')" id="tab-calculator" class="py-4 px-1 border-b-2 border-transparent text-sm font-medium whitespace-nowrap flex items-center space-x-2 theme-text-muted hover:text-slate-900 transition-all">
+                    <i class="fa-solid fa-calculator text-lg"></i>
+                    <span>Sourcing Savings Tool</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- TAB: EXECUTIVE OVERVIEW -->
+        <div id="content-overview" class="tab-content animate-fade-in space-y-8">
+            
+            <!-- KPI Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- KPI 1 -->
+                <div class="theme-card rounded-xl shadow-sm border p-6 relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 h-24 w-24 -mr-6 -mt-6 bg-purdueGold/10 rounded-full group-hover:scale-110 transition-transform duration-300"></div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-bold tracking-wider uppercase theme-text-muted">Total Supply Chain Purchases</span>
+                        <div class="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-extrabold" id="kpi-total-purchases">$13.70B</p>
+                    <p class="text-xs theme-text-muted mt-2 font-medium">Total input procurement across all biomedical & healthcare sectors</p>
+                </div>
+
+                <!-- KPI 2 -->
+                <div class="theme-card rounded-xl shadow-sm border p-6 relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 h-24 w-24 -mr-6 -mt-6 bg-emerald-500/10 rounded-full group-hover:scale-110 transition-transform duration-300"></div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-bold tracking-wider uppercase text-emerald-600">In-Region Purchases (Local)</span>
+                        <div class="p-2 bg-emerald-50 dark:bg-emerald-950 rounded-lg text-emerald-600">
+                            <i class="fa-solid fa-truck-ramp-box"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-extrabold text-emerald-700" id="kpi-inregion-purchases">$8.34B</p>
+                    <div class="flex items-center space-x-1.5 mt-2">
+                        <span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded" id="kpi-inregion-pct">60.9%</span>
+                        <span class="text-xs theme-text-muted font-medium">satisfied by regional suppliers</span>
+                    </div>
+                </div>
+
+                <!-- KPI 3 -->
+                <div class="theme-card rounded-xl shadow-sm border p-6 relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 h-24 w-24 -mr-6 -mt-6 bg-red-500/10 rounded-full group-hover:scale-110 transition-transform duration-300"></div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-bold tracking-wider uppercase text-red-600">Import Sourcing Gaps (Leakage)</span>
+                        <div class="p-2 bg-red-50 dark:bg-red-950 rounded-lg text-red-600">
+                            <i class="fa-solid fa-plane-arrival"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-extrabold text-red-600" id="kpi-imported-purchases">$5.36B</p>
+                    <div class="flex items-center space-x-1.5 mt-2">
+                        <span class="text-xs font-bold bg-red-100 text-red-800 px-2 py-0.5 rounded" id="kpi-imported-pct">39.1%</span>
+                        <span class="text-xs theme-text-muted font-medium">sourcing leakages (outside region)</span>
+                    </div>
+                </div>
+
+                <!-- KPI 4 -->
+                <div class="theme-card rounded-xl shadow-sm border p-6 relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 h-24 w-24 -mr-6 -mt-6 bg-purdueGoldDark/10 rounded-full group-hover:scale-110 transition-transform duration-300"></div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-bold text-purdueGoldDark tracking-wider uppercase">SBDC Targeting Efficiency</span>
+                        <div class="p-2 bg-amber-50 dark:bg-amber-950 rounded-lg text-purdueGoldDark">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-extrabold" id="kpi-sourcing-opportunities">12</p>
+                    <p class="text-xs theme-text-muted mt-2 font-medium">"Goldmine" industries with high demand and high import dependency</p>
+                </div>
+            </div>
+
+            <!-- Insights Box -->
+            <div class="bg-slate-900 text-white rounded-xl border border-slate-800 shadow-md p-6 relative overflow-hidden">
+                <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-y-1/4 translate-x-1/4">
+                    <i class="fa-solid fa-university text-9xl"></i>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="p-3 bg-purdueGoldDark text-slate-900 rounded-lg shrink-0 mt-1">
+                        <i class="fa-solid fa-lightbulb text-xl animate-pulse"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-purdueGold">SBDC Executive Insights: Sourcing Opportunities</h3>
+                        <p class="text-slate-300 text-sm mt-1.5 leading-relaxed">
+                            Central Indiana's Biomedical, Biotechnical, and Healthcare cluster demonstrates strong regional self-sufficiency (<strong>60.85%</strong>), but imports <strong>$5.36B</strong> of purchases annually. SBDC Business Advisors can target specific supply chain leakages—primarily in <strong>Drugs and Druggists' Sundries</strong> ($1.20B imported) and <strong>Medicinal and Botanical Manufacturing</strong> ($825M imported)—to drive import substitution, coordinate local partnerships, and attract strategic suppliers to Indiana.
+                        </p>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <span class="bg-slate-800 text-purdueGold text-xs font-semibold px-3 py-1 rounded-full border border-slate-700">Drugs and Druggists' (62.1% Imported)</span>
+                            <span class="bg-slate-800 text-purdueGold text-xs font-semibold px-3 py-1 rounded-full border border-slate-700">Medicinal Manufacturing (99.6% Imported)</span>
+                            <span class="bg-slate-800 text-purdueGold text-xs font-semibold px-3 py-1 rounded-full border border-slate-700">Biological Products (97.5% Imported)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Top 10 Purchases (Left, stacked bar) -->
+                <div class="theme-card rounded-xl shadow-sm border p-6 lg:col-span-2">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="font-bold text-lg">Top 10 Sourcing Sectors</h3>
+                            <p class="text-xs theme-text-muted font-medium">Highest total procurement and their sourcing distribution</p>
+                        </div>
+                        <span class="text-xs font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded border theme-border">Total Purchase Vol</span>
+                    </div>
+                    <div class="h-80 w-full relative">
+                        <canvas id="chart-top-sectors"></canvas>
+                    </div>
+                </div>
+
+                <!-- Overall distribution (Right, doughnut) -->
+                <div class="theme-card rounded-xl shadow-sm border p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-lg mb-1">Regional Sourcing Distribution</h3>
+                        <p class="text-xs theme-text-muted font-medium mb-6">Proportion of procurement satisfied locally vs imported</p>
+                    </div>
+                    <div class="h-56 relative flex items-center justify-center">
+                        <canvas id="chart-overall-distribution"></canvas>
+                    </div>
+                    <div class="border-t theme-border pt-4 mt-4 grid grid-cols-2 text-center text-xs">
+                        <div>
+                            <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1"></span>
+                            <span class="font-semibold theme-text-muted">Local Sourcing</span>
+                            <p class="font-bold text-sm text-emerald-600" id="doughnut-local-val">$8.34B</p>
+                        </div>
+                        <div>
+                            <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 mr-1"></span>
+                            <span class="font-semibold theme-text-muted">Import Sourcing</span>
+                            <p class="font-bold text-sm text-red-500" id="doughnut-imported-val">$5.36B</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Opportunities / Leakages -->
+            <div class="theme-card rounded-xl shadow-sm border p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="font-bold text-lg">Top 10 Absolute Import Leakages</h3>
+                        <p class="text-xs theme-text-muted font-medium">Largest absolute import gaps representing direct supplier localization opportunities</p>
+                    </div>
+                    <span class="text-xs font-bold bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 px-2.5 py-1 rounded border border-red-200">Import Volume</span>
+                </div>
+                <div class="h-80 w-full relative">
+                    <canvas id="chart-top-leakages"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB: SUPPLY CHAIN OPPORTUNITY MAP -->
+        <div id="content-opportunity" class="tab-content animate-fade-in space-y-8 hidden">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <!-- Sidebar explaining the Map -->
+                <div class="space-y-6 lg:col-span-1">
+                    <div class="bg-slate-900 text-white rounded-xl border border-slate-800 p-6 shadow-sm">
+                        <h3 class="font-bold text-lg text-purdueGold mb-3"><i class="fa-solid fa-map-location-dot mr-2"></i>Sourcing Opportunity Quadrants</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                            The plot maps sectors by their <strong>Total Purchasing Size</strong> (X-axis, sizing opportunity) against <strong>Import Sourcing Gaps (%)</strong> (Y-axis, import dependency).
+                        </p>
+                        <div class="space-y-3.5 text-xs">
+                            <div class="p-2.5 rounded bg-red-500/10 border border-red-500/20">
+                                <span class="font-bold text-red-400 block"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i>Quadrant I: SBDC Goldmine</span>
+                                <p class="text-[10px] text-slate-300 mt-1">High demand &gt;$50M and over 50% imported. Prime import substitution targets.</p>
+                            </div>
+                            <div class="p-2.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+                                <span class="font-bold text-emerald-400 block"><i class="fa-solid fa-shield-halved mr-1.5"></i>Quadrant II: Local Strongholds</span>
+                                <p class="text-[10px] text-slate-300 mt-1">High demand &gt;$50M and under 50% imported. Key regional export industries.</p>
+                            </div>
+                            <div class="p-2.5 rounded bg-amber-500/10 border border-amber-500/20">
+                                <span class="font-bold text-amber-400 block"><i class="fa-solid fa-gears mr-1.5"></i>Quadrant III: Niche Imports</span>
+                                <p class="text-[10px] text-slate-300 mt-1">Low demand &lt;$50M and over 50% imported. Specialized components.</p>
+                            </div>
+                            <div class="p-2.5 rounded bg-slate-800 border border-slate-700">
+                                <span class="font-bold text-slate-300 block"><i class="fa-solid fa-circle-check mr-1.5"></i>Quadrant IV: Local Champions</span>
+                                <p class="text-[10px] text-slate-400 mt-1">Low demand &lt;$50M and under 50% imported. Highly self-sufficient niches.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plot Container -->
+                <div class="theme-card rounded-xl shadow-sm border p-6 lg:col-span-3">
+                    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                        <div>
+                            <h3 class="font-bold text-lg">SBDC Supply Chain Opportunity Matrix</h3>
+                            <p class="text-xs theme-text-muted font-medium">Mapped bubble size represents absolute Imported Purchases ($). Interactive zoom/pan.</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-semibold theme-text-muted">X-Scale:</span>
+                            <button onclick="toggleScatterScale('logarithmic')" id="btn-scale-log" class="bg-purdueGoldDark text-slate-900 font-bold px-3 py-1 text-xs rounded border border-purdueGoldDark shadow-sm">Logarithmic</button>
+                            <button onclick="toggleScatterScale('linear')" id="btn-scale-lin" class="bg-white hover:bg-slate-50 text-slate-700 font-semibold px-3 py-1 text-xs rounded border border-slate-200 shadow-sm">Linear</button>
+                        </div>
+                    </div>
+                    <div class="h-96 relative w-full">
+                        <canvas id="chart-opportunity-scatter"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quadrant I Target List Table -->
+            <div class="theme-card rounded-xl shadow-sm border p-6">
+                <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+                            <h3 class="font-bold text-lg">Priority Quadrant I: SBDC Sourcing Goldmine Target List</h3>
+                        </div>
+                        <p class="text-xs theme-text-muted font-medium mt-1">High-volume procurement (Total &gt; $50M) with high import leakage (Import &gt; 50%). SBDC business attraction/matchmaking targets.</p>
+                    </div>
+                    <button onclick="exportGoldmineToCSV()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-1.5 px-3.5 rounded border border-slate-300 text-xs transition-all flex items-center space-x-1.5">
+                        <i class="fa-solid fa-file-csv"></i>
+                        <span>Export Targets (CSV)</span>
+                    </button>
+                </div>
+                <div class="overflow-x-auto scrollbar-custom border theme-border rounded-lg">
+                    <table class="min-w-full divide-y theme-border text-left text-sm">
+                        <thead class="theme-table-header font-bold">
+                            <tr>
+                                <th scope="col" class="px-4 py-3">NAICS</th>
+                                <th scope="col" class="px-4 py-3">Purchases From (Sectors)</th>
+                                <th scope="col" class="px-4 py-3 text-right">Total Purchases</th>
+                                <th scope="col" class="px-4 py-3 text-right">Import Sourcing Gaps</th>
+                                <th scope="col" class="px-4 py-3 text-center">Import %</th>
+                                <th scope="col" class="px-4 py-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="goldmine-table-rows" class="divide-y theme-border theme-text-muted font-medium">
+                            <!-- Populated dynamically in JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB: SECTOR DEEP-DIVE -->
+        <div id="content-drilldown" class="tab-content animate-fade-in space-y-8 hidden">
+            
+            <!-- Sector Selector Box -->
+            <div class="theme-card rounded-xl shadow-sm border p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="w-full md:w-2/3">
+                    <label class="block text-xs font-bold theme-text-muted uppercase tracking-widest mb-1.5">Select Sector to Analyze</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                        <input type="text" id="deep-dive-search" oninput="filterDeepDiveDropdown()" onfocus="showDeepDiveDropdown()" placeholder="Type NAICS code or keyword..." class="w-full pl-9 pr-4 py-3 border theme-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purdueGoldDark focus:border-transparent text-sm">
+                        <!-- Dropdown Options Overlay -->
+                        <div id="deep-dive-results" class="absolute z-50 w-full mt-1 theme-input border rounded-lg shadow-lg max-h-64 overflow-y-auto hidden scrollbar-custom text-sm font-medium">
+                            <!-- Filled dynamically in JS -->
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-auto flex items-center justify-end shrink-0 pt-4 md:pt-0">
+                    <button onclick="loadRandomSector()" class="w-full md:w-auto bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-semibold py-3 px-6 rounded-lg text-sm transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-shuffle"></i>
+                        <span>Select Random Sector</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="drilldown-results-container" class="space-y-8">
+                <!-- Sector Metrics Header Cards -->
+                <div class="theme-card rounded-xl shadow-sm border p-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b theme-border pb-6 gap-4">
+                        <div>
+                            <div class="flex items-center space-x-2.5">
+                                <span class="bg-purdueGoldDark text-slate-900 font-extrabold text-xs px-2.5 py-1 rounded" id="dd-naics">424210</span>
+                                <span class="text-xs theme-text-muted font-bold uppercase tracking-wider">NAICS Classification</span>
+                            </div>
+                            <h2 class="text-2xl font-bold mt-2" id="dd-name">Drugs and Druggists' Sundries Merchant Wholesalers</h2>
+                        </div>
+                        <span id="dd-priority" class="px-4 py-2 rounded-full text-sm font-semibold bg-red-100 text-red-800 border border-red-300">CRITICAL IMPORT LEAKAGE (SBDC PRIORITY 1)</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
+                        <!-- Card 1 -->
+                        <div class="p-4 bg-slate-50 dark:bg-slate-900 border theme-border rounded-lg">
+                            <span class="text-[10px] theme-text-muted font-bold uppercase tracking-wider block mb-1">Total Procurement Volume</span>
+                            <span class="text-2xl font-extrabold block" id="dd-total">$1,935,075,476</span>
+                            <span class="text-xs theme-text-muted font-medium">Total local cluster input requirements</span>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900 rounded-lg">
+                            <span class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider block mb-1">Satisfied Locally (In-Region)</span>
+                            <span class="text-2xl font-extrabold text-emerald-700 dark:text-emerald-500 block" id="dd-inregion">$733,943,443 (37.9%)</span>
+                            <span class="text-xs theme-text-muted font-medium">Purchased from Central Indiana vendors</span>
+                        </div>
+                        <!-- Card 3 -->
+                        <div class="p-4 bg-red-50/50 dark:bg-red-950/20 border border-red-100 dark:border-red-900 rounded-lg">
+                            <span class="text-[10px] text-red-600 font-bold uppercase tracking-wider block mb-1">Import Sourcing Gaps (Leakage)</span>
+                            <span class="text-2xl font-extrabold text-red-600 dark:text-red-400 block" id="dd-imported">$1,201,132,033 (62.1%)</span>
+                            <span class="text-xs theme-text-muted font-medium">Procured outside Central Indiana</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Benchmarking and Sourcing Breakdown -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Left: Doughnut Breakdown of Sourcing -->
+                    <div class="theme-card rounded-xl shadow-sm border p-6">
+                        <h3 class="font-bold text-lg mb-2">Sourcing Ratio Breakdown</h3>
+                        <p class="text-xs theme-text-muted font-medium mb-6">Percentage of total purchases satisfied locally vs imported</p>
+                        <div class="h-64 relative flex items-center justify-center">
+                            <canvas id="chart-drilldown-doughnut"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Right: Comparison with Cluster Average -->
+                    <div class="theme-card rounded-xl shadow-sm border p-6 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-lg mb-2">Regional Benchmark Analysis</h3>
+                            <p class="text-xs theme-text-muted font-medium mb-6">Comparison of import dependency against cluster average (39.15%)</p>
+                            
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1.5">
+                                        <span>Import Dependency (Selected Sector)</span>
+                                        <span id="dd-benchmark-sector-pct" class="font-bold text-red-600">62.1%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3">
+                                        <div id="dd-benchmark-sector-bar" class="bg-red-500 h-3 rounded-full" style="width: 62.1%"></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1.5">
+                                        <span>Regional Average Import Dependency</span>
+                                        <span class="font-bold theme-text-muted">39.15%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3">
+                                        <div class="bg-slate-400 h-3 rounded-full" style="width: 39.15%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 p-4 bg-slate-50 dark:bg-slate-900 border theme-border rounded-lg">
+                            <h4 class="font-bold text-sm flex items-center space-x-1.5">
+                                <i class="fa-solid fa-circle-exclamation text-amber-500"></i>
+                                <span>Benchmark Sourcing Verdict</span>
+                            </h4>
+                            <p class="text-xs theme-text-muted mt-2 leading-relaxed" id="dd-benchmark-verdict">
+                                This sector is <strong>more import-dependent</strong> than the regional average by <strong>+22.95%</strong>. SBDC advisors should prioritize this industry for supplier intervention.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SBDC Playbook for this sector -->
+                <div class="theme-card rounded-xl shadow-sm border p-6">
+                    <h3 class="font-bold text-lg mb-4 flex items-center space-x-2">
+                        <i class="fa-solid fa-graduation-cap text-purdueGoldDark"></i>
+                        <span>SBDC Sourcing Advisor Playbook</span>
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                        <!-- Play 1 -->
+                        <div class="p-4 border theme-border rounded-lg">
+                            <div class="flex items-center space-x-2 font-bold mb-2">
+                                <span class="bg-slate-100 dark:bg-slate-800 rounded-full h-6 w-6 flex items-center justify-center font-extrabold text-xs">1</span>
+                                <span>Supplier Matchmaking</span>
+                            </div>
+                            <p class="text-xs theme-text-muted leading-relaxed" id="dd-play-1">
+                                Search local SBDC business networks to identify Indiana chemical and wholesaler partners that can satisfy this sector's requirements.
+                            </p>
+                        </div>
+                        <!-- Play 2 -->
+                        <div class="p-4 border theme-border rounded-lg">
+                            <div class="flex items-center space-x-2 font-bold mb-2">
+                                <span class="bg-slate-100 dark:bg-slate-800 rounded-full h-6 w-6 flex items-center justify-center font-extrabold text-xs">2</span>
+                                <span>Purdue MEP Coordination</span>
+                            </div>
+                            <p class="text-xs theme-text-muted leading-relaxed" id="dd-play-2">
+                                Partner with Purdue Manufacturing Extension Partnership (MEP) to assist regional manufacturers in upgrading their capacity to handle biomedical standards.
+                            </p>
+                        </div>
+                        <!-- Play 3 -->
+                        <div class="p-4 border theme-border rounded-lg">
+                            <div class="flex items-center space-x-2 font-bold mb-2">
+                                <span class="bg-slate-100 dark:bg-slate-800 rounded-full h-6 w-6 flex items-center justify-center font-extrabold text-xs">3</span>
+                                <span>Strategic Attraction</span>
+                            </div>
+                            <p class="text-xs theme-text-muted leading-relaxed" id="dd-play-3">
+                                Provide regional economic development groups with customized local purchasing demand reports ($1.20B gap in this sector) to attract outside companies to set up facilities in Indiana.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB: DATA DIRECTORY -->
+        <div id="content-directory" class="tab-content animate-fade-in space-y-6 hidden">
+            
+            <!-- Filters Card -->
+            <div class="theme-card rounded-xl shadow-sm border p-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    <!-- Keyword Search -->
+                    <div class="md:col-span-4 relative">
+                        <label class="block text-xs font-bold theme-text-muted uppercase tracking-widest mb-1.5">Sectors Search</label>
+                        <div class="absolute pt-8 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                        <input type="text" id="dir-search" oninput="applyFilters()" placeholder="Search NAICS or keywords..." class="w-full pl-9 pr-4 py-2 border theme-input rounded-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-purdueGoldDark focus:border-transparent text-sm">
+                    </div>
+
+                    <!-- Sourcing Profile Filter -->
+                    <div class="md:col-span-3">
+                        <label class="block text-xs font-bold theme-text-muted uppercase tracking-widest mb-1.5">Sourcing Gaps Profile</label>
+                        <select id="dir-filter-profile" onchange="applyFilters()" class="w-full px-3 py-2 border theme-input rounded-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-purdueGoldDark focus:border-transparent text-sm font-medium">
+                            <option value="all">All Sourcing Types</option>
+                            <option value="leakage">High Leakage (&gt;50% Imported)</option>
+                            <option value="balanced">Balanced (10% - 50% Imported)</option>
+                            <option value="local">High Self-Sufficiency (&lt;10% Imported)</option>
+                        </select>
+                    </div>
+
+                    <!-- Purchase Size Filter -->
+                    <div class="md:col-span-3">
+                        <label class="block text-xs font-bold theme-text-muted uppercase tracking-widest mb-1.5">Sectors Procurement Size</label>
+                        <select id="dir-filter-size" onchange="applyFilters()" class="w-full px-3 py-2 border theme-input rounded-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-purdueGoldDark focus:border-transparent text-sm font-medium">
+                            <option value="all">All Sizes</option>
+                            <option value="giant">Giant (Total &gt; $100M)</option>
+                            <option value="large">Large ($50M - $100M)</option>
+                            <option value="medium">Medium ($10M - $50M)</option>
+                            <option value="small">Small (&lt; $10M)</option>
+                        </select>
+                    </div>
+
+                    <!-- Export and Reset -->
+                    <div class="md:col-span-2 flex items-end space-x-2">
+                        <button onclick="exportAllFilteredToCSV()" class="flex-grow bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-3 rounded-lg border border-slate-300 text-xs transition-all flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-file-csv text-base"></i>
+                            <span>Export</span>
+                        </button>
+                        <button onclick="resetDirectoryFilters()" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-lg transition-all" title="Reset Filters">
+                            <i class="fa-solid fa-filter-circle-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="theme-card rounded-xl shadow-sm border p-6 space-y-4">
+                <div class="flex items-center justify-between flex-wrap gap-4 text-xs font-bold theme-text-muted">
+                    <span id="table-results-counter">Showing 1-10 of 60 sectors</span>
+                    <div class="flex items-center space-x-1.5">
+                        <span>Show</span>
+                        <select id="dir-pagesize" onchange="changePageSize(this.value)" class="px-2 py-1 border theme-input rounded focus:outline-none focus:ring-1 focus:ring-purdueGoldDark">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="55">55</option>
+                        </select>
+                        <span>rows per page</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto scrollbar-custom border theme-border rounded-lg">
+                    <table class="min-w-full divide-y theme-border text-left text-sm">
+                        <thead class="theme-table-header font-bold select-none">
+                            <tr>
+                                <th scope="col" onclick="setSort('naics')" class="px-4 py-3 cursor-pointer hover:bg-slate-100/50 transition-colors">
+                                    <div class="flex items-center space-x-1">
+                                        <span>NAICS</span>
+                                        <span id="sort-icon-naics"><i class="fa-solid fa-sort"></i></span>
+                                    </div>
+                                </th>
+                                <th scope="col" onclick="setSort('name')" class="px-4 py-3 cursor-pointer hover:bg-slate-100/50 transition-colors">
+                                    <div class="flex items-center space-x-1">
+                                        <span>Purchases from (Supplier Industries)</span>
+                                        <span id="sort-icon-name"><i class="fa-solid fa-sort"></i></span>
+                                    </div>
+                                </th>
+                                <th scope="col" onclick="setSort('inRegionPurchases')" class="px-4 py-3 text-right cursor-pointer hover:bg-slate-100/50 transition-colors">
+                                    <div class="flex items-center justify-end space-x-1">
+                                        <span>In-Region</span>
+                                        <span id="sort-icon-inRegionPurchases"><i class="fa-solid fa-sort"></i></span>
+                                    </div>
+                                </th>
+                                <th scope="col" onclick="setSort('pctInRegion')" class="px-3 py-3 text-center cursor-pointer hover:bg-slate-100/50 transition-colors">
+                                    <div class="flex items-center justify-center space-x-1">
+                                        <span>In-Region %</span>
+                                        <span id="sort-icon-pctInRegion"><i class="fa-solid fa-sort"></i></span>
+                                    </div>
+                                </th>
+                                <th scope="col" onclick="setSort('importedPurchases')" class="px-4 py-3 text-right cursor-pointer hover:bg-slate-100/50 transition-colors">
+                                    <div class="flex items-center justify-end space-x-1">
+                                        <span>Imported</span>
+                                        <span id="sort-icon-importedPurchases"><i class="fa-solid fa-sort"></i></span>
+                                    </div>
+                                </th>
+                                <th scope="col" onclick="setSort('pctImported')" class="px-3 py-3 text-center cursor-pointer hover:bg-slate-100/50 transition-colors">
+                                    <div class="flex items-center justify-center space-x-1">
+                                        <span>Imported %</span>
+                                        <span id="sort-icon-pctImported"><i class="fa-solid fa-sort"></i></span>
+                                    </div>
+                                </th>
+                                <th scope="col" onclick="setSort('totalPurchases')" class="px-4 py-3 text-right cursor-pointer hover:bg-slate-100/50 transition-colors">
+                                    <div class="flex items-center justify-end space-x-1">
+                                        <span>Total Purchases</span>
+                                        <span id="sort-icon-totalPurchases"><i class="fa-solid fa-sort"></i></span>
+                                    </div>
+                                </th>
+                                <th scope="col" class="px-4 py-3 text-center">Analyze</th>
+                            </tr>
+                        </thead>
+                        <tbody id="directory-table-rows" class="divide-y theme-border theme-text-muted font-medium">
+                            <!-- Populated dynamically in JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination controls -->
+                <div class="flex items-center justify-between border-t theme-border pt-4 flex-wrap gap-4 select-none">
+                    <button id="btn-page-prev" onclick="changePage(-1)" class="px-4 py-2 border theme-border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs transition-all flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-circle-arrow-left"></i>
+                        <span>Previous</span>
+                    </button>
+                    
+                    <div id="table-pagination-pages" class="flex items-center space-x-1 text-xs">
+                        <!-- Pages will be filled dynamically -->
+                    </div>
+
+                    <button id="btn-page-next" onclick="changePage(1)" class="px-4 py-2 border theme-border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs transition-all flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span>Next</span>
+                        <i class="fa-solid fa-circle-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB: CALCULATOR -->
+        <div id="content-calculator" class="tab-content animate-fade-in space-y-8 hidden">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Sourcing Calculator Form Card -->
+                <div class="theme-card rounded-xl shadow-sm border p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-lg mb-2 flex items-center space-x-2">
+                            <i class="fa-solid fa-scale-balanced text-purdueGoldDark"></i>
+                            <span>Supplier Sourcing Savings Calculator</span>
+                        </h3>
+                        <p class="text-xs theme-text-muted font-medium mb-6">Estimate potential procurement savings and local investment value.</p>
+                        
+                        <div class="space-y-4">
+                            <!-- Sector Search Input -->
+                            <div>
+                                <label class="block text-xs font-bold theme-text-muted uppercase mb-1.5">Supplier Sector NAICS</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                        <i class="fa-solid fa-tag"></i>
+                                    </div>
+                                    <input type="text" id="calc-search" oninput="filterCalcDropdown()" onfocus="showCalcDropdown()" placeholder="Type NAICS code or keyword..." class="w-full pl-9 pr-4 py-2.5 border theme-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purdueGoldDark focus:border-transparent text-sm">
+                                    <!-- Dropdown Overlay -->
+                                    <div id="calc-results" class="absolute z-50 w-full mt-1 theme-input border rounded-lg shadow-lg max-h-48 overflow-y-auto hidden scrollbar-custom text-sm font-medium">
+                                        <!-- Filled dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Selected Sector Summary (Read only) -->
+                            <div class="p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border theme-border flex items-center justify-between text-xs">
+                                <div>
+                                    <span class="font-bold theme-text-muted block uppercase text-[9px] tracking-wider">Active Sourcing Category</span>
+                                    <span id="calc-selected-sector" class="font-bold">Drugs and Druggists' Sundries (424210)</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="font-bold theme-text-muted block uppercase text-[9px] tracking-wider">Category Sourcing Gap</span>
+                                    <span id="calc-selected-gap" class="font-bold text-red-600">$1.20B (62.1% Imported)</span>
+                                </div>
+                            </div>
+
+                            <!-- Company Annual Spending -->
+                            <div>
+                                <label class="block text-xs font-bold theme-text-muted uppercase mb-1.5">Annual Company Procurement Spend ($)</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 font-bold text-sm">
+                                        $
+                                    </div>
+                                    <input type="number" id="calc-spend" value="5000000" oninput="calculateSavings()" class="w-full pl-7 pr-4 py-2.5 border theme-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purdueGoldDark focus:border-transparent text-sm">
+                                </div>
+                                <p class="text-[10px] theme-text-muted mt-1 font-semibold">Enter your client's total annual input spending in this category</p>
+                            </div>
+
+                            <!-- Logistics/Local Switching Savings % -->
+                            <div>
+                                <label class="block text-xs font-bold theme-text-muted uppercase mb-1.5">Estimated Switching & Logistics Savings (%)</label>
+                                <div class="relative">
+                                    <input type="range" id="calc-savings-pct" min="1" max="25" value="8" oninput="updateSavingsPctLabel(this.value); calculateSavings()" class="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purdueGoldDark">
+                                    <div class="flex justify-between text-[10px] theme-text-muted font-bold mt-1">
+                                        <span>1% (Conservative)</span>
+                                        <span class="bg-purdueGoldLight dark:bg-slate-800 text-slate-900 dark:text-purdueGold px-1.5 py-0.5 rounded" id="calc-savings-label">8% Savings</span>
+                                        <span>25% (High Advantage)</span>
+                                    </div>
+                                </div>
+                                <p class="text-[10px] theme-text-muted mt-2 font-medium">Local sourcing typically reduces transit times, inventory holding costs, shipping tariffs, and carbon footprints by <strong>5-15%</strong>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculator Output Cards -->
+                <div class="theme-card rounded-xl shadow-sm border p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-lg mb-4 flex items-center space-x-2">
+                            <i class="fa-solid fa-receipt text-slate-700"></i>
+                            <span>Sourcing Savings Assessment Report</span>
+                        </h3>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <!-- Out 1 -->
+                            <div class="p-4 bg-emerald-50 border border-emerald-100 rounded-lg">
+                                <span class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider block">Est. Annual Cash Savings</span>
+                                <span class="text-2xl font-extrabold text-emerald-700 block mt-1" id="calc-out-savings">$400,000</span>
+                                <span class="text-[10px] theme-text-muted font-medium">Direct logistics & lead time savings</span>
+                            </div>
+                            <!-- Out 2 -->
+                            <div class="p-4 bg-slate-50 dark:bg-slate-900 border theme-border rounded-lg">
+                                <span class="text-[10px] theme-text-muted font-bold uppercase tracking-wider block">Estimated Local Injection</span>
+                                <span class="text-2xl font-extrabold block mt-1" id="calc-out-local-injection">$5,000,000</span>
+                                <span class="text-[10px] theme-text-muted font-medium">Value injected into Indiana vendors</span>
+                            </div>
+                        </div>
+
+                        <!-- Impact Visual Indicator -->
+                        <div class="border theme-border p-4 rounded-lg bg-slate-50 dark:bg-slate-900 space-y-3">
+                            <h4 class="font-bold text-xs uppercase tracking-wide flex items-center space-x-1.5">
+                                <i class="fa-solid fa-hand-holding-dollar text-purdueGoldDark"></i>
+                                <span>Estimated SBDC Impact Analysis</span>
+                            </h4>
+                            <div class="space-y-2 text-xs theme-text-muted leading-relaxed font-medium">
+                                <p>By transitioning sourcing of <strong id="calc-impact-sector-name" class="text-slate-900 dark:text-slate-100">Drugs and Druggists' Sundries</strong> locally:</p>
+                                <ul class="list-disc pl-5 space-y-1 mt-1 text-[11px]">
+                                    <li>This company would recover <strong id="calc-impact-percent-of-leakage" class="text-slate-900 dark:text-slate-100">0.42%</strong> of the total regional import leakage gap ($1.20B).</li>
+                                    <li>Localizing these contracts sustains approximately <strong id="calc-impact-jobs" class="text-slate-900 dark:text-slate-100">15</strong> high-wage healthcare/biotech supplier jobs in Indiana.</li>
+                                    <li>Indiana supplier networks can scale production, reducing import dependencies for neighboring clinics and laboratories.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 border-t theme-border pt-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center space-x-2 text-slate-400 font-bold text-[10px] uppercase">
+                            <i class="fa-solid fa-user-shield text-slate-400 text-lg"></i>
+                            <span>Verified SBDC Sourcing Framework</span>
+                        </div>
+                        <button onclick="downloadSavingsReport()" class="w-full md:w-auto bg-purdueGoldDark hover:bg-slate-900 hover:text-purdueGold text-slate-900 font-bold py-2.5 px-6 rounded-lg text-xs transition-all flex items-center justify-center space-x-1.5 shadow-sm border border-purdueGoldDark">
+                            <i class="fa-solid fa-file-pdf"></i>
+                            <span>Print Report</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 font-medium">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="space-y-1.5">
+                <p class="font-bold text-slate-300">Central Indiana SBDC Network • Sourcing & Sourcing Gaps Dashboard</p>
+                <p>Created by the <strong>Purdue Center for Regional Development (PCRD)</strong></p>
+                <p>Data Source: <strong>Lightcast</strong> (Biomedical, Biotechnical, and Healthcare Cluster Sourcing Study)</p>
+            </div>
+            <div class="flex space-x-4 items-center">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span class="font-bold text-slate-300 tracking-wider">PCRD COLLABORATION HUB</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- EMBEDDED DYNAMIC SUPPLY CHAIN DATA AND LOGIC -->
+    <script>
+        // Cleaned structured static dataset containing the top 60 industries from Lightcast
+        const allSectors = [
+            { naics: "424210", name: "Drugs and Druggists' Sundries Merchant Wholesalers", inRegionPurchases: 733943443, pctInRegion: 37.9, importedPurchases: 1201132033, pctImported: 62.1, totalPurchases: 1935075476 },
+            { naics: "325411", name: "Medicinal and Botanical Manufacturing", inRegionPurchases: 2926041, pctInRegion: 0.4, importedPurchases: 825175636, pctImported: 99.6, totalPurchases: 828101677 },
+            { naics: "551114", name: "Corporate, Subsidiary, and Regional Managing Offices", inRegionPurchases: 536241443, pctInRegion: 68.0, importedPurchases: 251840130, pctImported: 32.0, totalPurchases: 788081573 },
+            { naics: "325414", name: "Biological Product (except Diagnostic) Manufacturing", inRegionPurchases: 18972179, pctInRegion: 2.5, importedPurchases: 754848232, pctImported: 97.5, totalPurchases: 773820411 },
+            { naics: "541110", name: "Offices of Lawyers", inRegionPurchases: 509569355, pctInRegion: 91.2, importedPurchases: 48912083, pctImported: 8.8, totalPurchases: 558481437 },
+            { naics: "531110", name: "Lessors of Residential Buildings and Dwellings", inRegionPurchases: 450136934, pctInRegion: 99.2, importedPurchases: 3815418, pctImported: 0.8, totalPurchases: 453952352 },
+            { naics: "561320", name: "Temporary Help Services", inRegionPurchases: 352334592, pctInRegion: 99.8, importedPurchases: 674480, pctImported: 0.2, totalPurchases: 353009072 },
+            { naics: "531210", name: "Offices of Real Estate Agents and Brokers", inRegionPurchases: 334554716, pctInRegion: 99.6, importedPurchases: 1326946, pctImported: 0.4, totalPurchases: 335881663 },
+            { naics: "531120", name: "Lessors of Nonresidential Buildings (except Miniwarehouses)", inRegionPurchases: 230037484, pctInRegion: 75.6, importedPurchases: 74387699, pctImported: 24.4, totalPurchases: 304425183 },
+            { naics: "531390", name: "Other Activities Related to Real Estate", inRegionPurchases: 233738405, pctInRegion: 82.0, importedPurchases: 51239352, pctImported: 18.0, totalPurchases: 284977756 },
+            { naics: "325412", name: "Pharmaceutical Preparation Manufacturing", inRegionPurchases: 230271008, pctInRegion: 97.3, importedPurchases: 6299254, pctImported: 2.7, totalPurchases: 236570263 },
+            { naics: "523940", name: "Portfolio Management and Investment Advice", inRegionPurchases: 143621867, pctInRegion: 72.0, importedPurchases: 55828894, pctImported: 28.0, totalPurchases: 199450761 },
+            { naics: "541611", name: "Administrative Management and General Management Consulting Services", inRegionPurchases: 179756417, pctInRegion: 94.6, importedPurchases: 10355600, pctImported: 5.4, totalPurchases: 190112017 },
+            { naics: "531311", name: "Residential Property Managers", inRegionPurchases: 172965878, pctInRegion: 99.1, importedPurchases: 1590670, pctImported: 0.9, totalPurchases: 174556548 },
+            { naics: "522110", name: "Commercial Banking", inRegionPurchases: 122425374, pctInRegion: 71.0, importedPurchases: 49977782, pctImported: 29.0, totalPurchases: 172403156 },
+            { naics: "722511", name: "Full-Service Restaurants", inRegionPurchases: 152307239, pctInRegion: 96.1, importedPurchases: 6108272, pctImported: 3.9, totalPurchases: 158415511 },
+            { naics: "561110", name: "Office Administrative Services", inRegionPurchases: 105775482, pctInRegion: 76.1, importedPurchases: 33226535, pctImported: 23.9, totalPurchases: 139002017 },
+            { naics: "524126", name: "Direct Property and Casualty Insurance Carriers", inRegionPurchases: 130499647, pctInRegion: 96.9, importedPurchases: 4230653, pctImported: 3.1, totalPurchases: 134730300 },
+            { naics: "541990", name: "All Other Professional, Scientific, and Technical Services", inRegionPurchases: 77487179, pctInRegion: 67.5, importedPurchases: 37228287, pctImported: 32.5, totalPurchases: 114715466 },
+            { naics: "325413", name: "In-Vitro Diagnostic Substance Manufacturing", inRegionPurchases: 112404490, pctInRegion: 98.2, importedPurchases: 2043731, pctImported: 1.8, totalPurchases: 114448221 },
+            { naics: "531130", name: "Lessors of Miniwarehouses and Self-Storage Units", inRegionPurchases: 113369561, pctInRegion: 99.2, importedPurchases: 901913, pctImported: 0.8, totalPurchases: 114271474 },
+            { naics: "524114", name: "Direct Health and Medical Insurance Carriers", inRegionPurchases: 109103056, pctInRegion: 99.9, importedPurchases: 148187, pctImported: 0.1, totalPurchases: 109251243 },
+            { naics: "516210", name: "Media Streaming Distribution Services and Content Providers", inRegionPurchases: 17648850, pctInRegion: 17.1, importedPurchases: 85267884, pctImported: 82.9, totalPurchases: 102916734 },
+            { naics: "561330", name: "Professional Employer Organizations", inRegionPurchases: 71747150, pctInRegion: 73.8, importedPurchases: 25465585, pctImported: 26.2, totalPurchases: 97212735 },
+            { naics: "325199", name: "All Other Basic Organic Chemical Manufacturing", inRegionPurchases: 66465275, pctInRegion: 70.2, importedPurchases: 28172596, pctImported: 29.8, totalPurchases: 94637872 },
+            { naics: "518210", name: "Computing Infrastructure Providers and Data Processing", inRegionPurchases: 45631186, pctInRegion: 49.7, importedPurchases: 46129812, pctImported: 50.3, totalPurchases: 91760998 },
+            { naics: "531312", name: "Nonresidential Property Managers", inRegionPurchases: 86020709, pctInRegion: 97.3, importedPurchases: 2420172, pctImported: 2.7, totalPurchases: 88440881 },
+            { naics: "541330", name: "Engineering Services", inRegionPurchases: 81161080, pctInRegion: 96.8, importedPurchases: 2686842, pctImported: 3.2, totalPurchases: 83847922 },
+            { naics: "221122", name: "Electric Power Distribution", inRegionPurchases: 51759544, pctInRegion: 64.5, importedPurchases: 28545871, pctImported: 35.5, totalPurchases: 80305415 },
+            { naics: "531190", name: "Lessors of Other Real Estate Property", inRegionPurchases: 68302739, pctInRegion: 86.0, importedPurchases: 11101081, pctImported: 14.0, totalPurchases: 79403820 },
+            { naics: "326199", name: "All Other Plastics Product Manufacturing", inRegionPurchases: 15714741, pctInRegion: 20.2, importedPurchases: 62203598, pctImported: 79.8, totalPurchases: 77918339 },
+            { naics: "513210", name: "Software Publishers", inRegionPurchases: 22243037, pctInRegion: 29.9, importedPurchases: 52161653, pctImported: 70.1, totalPurchases: 74404690 },
+            { naics: "339112", name: "Surgical and Medical Instrument Manufacturing", inRegionPurchases: 9794531, pctInRegion: 13.5, importedPurchases: 62668599, pctImported: 86.5, totalPurchases: 72463130 },
+            { naics: "423430", name: "Computer and Software Merchant Wholesalers", inRegionPurchases: 35143915, pctInRegion: 51.7, importedPurchases: 32891241, pctImported: 48.3, totalPurchases: 68035156 },
+            { naics: "423450", name: "Medical and Hospital Supplies Merchant Wholesalers", inRegionPurchases: 30967996, pctInRegion: 47.7, importedPurchases: 33962888, pctImported: 52.3, totalPurchases: 64930884 },
+            { naics: "541211", name: "Offices of Certified Public Accountants", inRegionPurchases: 61625051, pctInRegion: 98.5, importedPurchases: 966444, pctImported: 1.5, totalPurchases: 62591494 },
+            { naics: "541613", name: "Marketing Consulting Services", inRegionPurchases: 58563454, pctInRegion: 98.7, importedPurchases: 783027, pctImported: 1.3, totalPurchases: 59346481 },
+            { naics: "541512", name: "Computer Systems Design Services", inRegionPurchases: 57954237, pctInRegion: 98.7, importedPurchases: 757209, pctImported: 1.3, totalPurchases: 58711446 },
+            { naics: "519290", name: "Web Search Portals and All Other Information Services", inRegionPurchases: 4330986, pctInRegion: 7.6, importedPurchases: 53022160, pctImported: 92.4, totalPurchases: 57353146 },
+            { naics: "533110", name: "Lessors of Nonfinancial Intangible Assets", inRegionPurchases: 36141019, pctInRegion: 63.3, importedPurchases: 20958196, pctImported: 36.7, totalPurchases: 57099215 },
+            { naics: "541690", name: "Other Scientific and Technical Consulting Services", inRegionPurchases: 53258738, pctInRegion: 93.8, importedPurchases: 3511960, pctImported: 6.2, totalPurchases: 56770699 },
+            { naics: "484121", name: "General Freight Trucking, Long-Distance, Truckload", inRegionPurchases: 54153482, pctInRegion: 99.7, importedPurchases: 163521, pctImported: 0.3, totalPurchases: 54317003 },
+            { naics: "722310", name: "Food Service Contractors", inRegionPurchases: 49246728, pctInRegion: 92.4, importedPurchases: 4050336, pctImported: 7.6, totalPurchases: 53297064 },
+            { naics: "333415", name: "Air-Conditioning and Commercial Refrigeration Equipment Manufacturing", inRegionPurchases: 33321702, pctInRegion: 65.5, importedPurchases: 17532971, pctImported: 34.5, totalPurchases: 50854673 },
+            { naics: "493110", name: "General Warehousing and Storage", inRegionPurchases: 43026858, pctInRegion: 90.3, importedPurchases: 4596712, pctImported: 9.7, totalPurchases: 47623570 },
+            { naics: "561311", name: "Employment Placement Agencies", inRegionPurchases: 45891217, pctInRegion: 96.9, importedPurchases: 1462487, pctImported: 3.1, totalPurchases: 47353704 },
+            { naics: "722515", name: "Snack and Nonalcoholic Beverage Bars", inRegionPurchases: 36934711, pctInRegion: 78.4, importedPurchases: 10196777, pctImported: 21.6, totalPurchases: 47131489 },
+            { naics: "523150", name: "Investment Banking and Securities Intermediation", inRegionPurchases: 38555531, pctInRegion: 88.2, importedPurchases: 5147623, pctImported: 11.8, totalPurchases: 43703154 },
+            { naics: "621511", name: "Medical Laboratories", inRegionPurchases: 42076350, pctInRegion: 99.1, importedPurchases: 361460, pctImported: 0.9, totalPurchases: 42437809 },
+            { naics: "811310", name: "Commercial and Industrial Machinery Repair and Maintenance", inRegionPurchases: 38750379, pctInRegion: 92.7, importedPurchases: 3049952, pctImported: 7.3, totalPurchases: 41800331 },
+            { naics: "492110", name: "Couriers and Express Delivery Services", inRegionPurchases: 36732673, pctInRegion: 89.6, importedPurchases: 4248179, pctImported: 10.4, totalPurchases: 40980852 },
+            { naics: "325120", name: "Industrial Gas Manufacturing", inRegionPurchases: 30730850, pctInRegion: 78.7, importedPurchases: 8312093, pctImported: 21.3, totalPurchases: 39042944 },
+            { naics: "541940", name: "Veterinary Services", inRegionPurchases: 37617766, pctInRegion: 97.9, importedPurchases: 808320, pctImported: 2.1, totalPurchases: 38426086 },
+            { naics: "621910", name: "Ambulance Services", inRegionPurchases: 19626772, pctInRegion: 52.7, importedPurchases: 17606390, pctImported: 47.3, totalPurchases: 37233162 },
+            { naics: "722513", name: "Limited-Service Restaurants", inRegionPurchases: 33761976, pctInRegion: 98.1, importedPurchases: 653781, pctImported: 1.9, totalPurchases: 34415757 },
+            { naics: "331110", name: "Iron and Steel Mills and Ferroalloy Manufacturing", inRegionPurchases: 2895887, pctInRegion: 8.5, importedPurchases: 31089597, pctImported: 91.5, totalPurchases: 33985484 },
+            { naics: "621999", name: "All Other Miscellaneous Ambulatory Health Care Services", inRegionPurchases: 32744380, pctInRegion: 96.6, importedPurchases: 1140305, pctImported: 3.4, totalPurchases: 33884685 },
+            { naics: "721110", name: "Hotels (except Casino Hotels) and Motels", inRegionPurchases: 26796773, pctInRegion: 80.2, importedPurchases: 6599570, pctImported: 19.8, totalPurchases: 33396344 },
+            { naics: "561730", name: "Landscaping Services", inRegionPurchases: 30955843, pctInRegion: 93.0, importedPurchases: 2343961, pctImported: 7.0, totalPurchases: 33299805 },
+            { naics: "323111", name: "Commercial Printing (except Screen and Books)", inRegionPurchases: 13777350, pctInRegion: 41.8, importedPurchases: 19163398, pctImported: 58.2, totalPurchases: 32940748 }
+        ];
+
+        // Global State Variables
+        let filteredSectors = [...allSectors];
+        let currentTab = 'overview';
+        
+        // Pagination state
+        let currentPage = 1;
+        let pageSize = 10;
+        
+        // Sorting state
+        let sortColumn = 'totalPurchases';
+        let sortDirection = 'desc';
+
+        // Chart.js references
+        let chartTopSectors = null;
+        let chartTopLeakages = null;
+        let chartOverallDistribution = null;
+        let chartOpportunityScatter = null;
+        let chartDrilldownDoughnut = null;
+
+        // Scatter plot scale state
+        let scatterScale = 'logarithmic';
+
+        // Sourcing Savings selected sector
+        let calcSelectedSector = null;
+
+        // Formatting utilities
+        function formatCurrency(value) {
+            if (value >= 1e9) {
+                return '$' + (value / 1e9).toFixed(2) + 'B';
+            } else if (value >= 1e6) {
+                return '$' + (value / 1e6).toFixed(1) + 'M';
+            } else {
+                return '$' + value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            }
+        }
+
+        function formatFullCurrency(value) {
+            return '$' + value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        // Initialize Application
+        window.onload = function() {
+            // Compute KPIs on launch
+            computeKPIs();
+            
+            // Render UI components
+            renderOverviewCharts();
+            renderOpportunityChart();
+            populateGoldmineTable();
+            populateDropdowns();
+            
+            // Default load first sector into Deep-Dive (Drugs & Druggists' 424210)
+            loadSectorIntoDeepDive('424210');
+            
+            // Set calculator default category
+            setCalculatorSector('424210');
+
+            // Render paginated data directory
+            applyFilters();
+        };
+
+        // Compute overall regional KPIs
+        function computeKPIs() {
+            let total = 13702472495; // Absolute Study Wide Aggregates from Lightcast
+            let inRegion = 8337530922;
+            let imported = 5364941565;
+            let goldmineCount = 0;
+
+            allSectors.forEach(s => {
+                // Goldmine criteria: Total Purchases > $50M and Imported % > 50%
+                if (s.totalPurchases >= 50000000 && s.pctImported >= 50) {
+                    goldmineCount++;
+                }
+            });
+
+            const pctInRegion = (inRegion / total) * 100;
+            const pctImported = (imported / total) * 100;
+
+            document.getElementById('kpi-total-purchases').innerText = formatCurrency(total);
+            document.getElementById('kpi-inregion-purchases').innerText = formatCurrency(inRegion);
+            document.getElementById('kpi-inregion-pct').innerText = pctInRegion.toFixed(1) + '%';
+            document.getElementById('kpi-imported-purchases').innerText = formatCurrency(imported);
+            document.getElementById('kpi-imported-pct').innerText = pctImported.toFixed(1) + '%';
+            document.getElementById('kpi-sourcing-opportunities').innerText = goldmineCount;
+
+            document.getElementById('doughnut-local-val').innerText = formatCurrency(inRegion);
+            document.getElementById('doughnut-imported-val').innerText = formatCurrency(imported);
+            document.getElementById('sectors-badge-count').innerText = allSectors.length;
+        }
+
+        // Theme Toggle Controller
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('dark-theme');
+            const isDark = body.classList.contains('dark-theme');
+            
+            const btn = document.getElementById('theme-toggle-btn');
+            if (isDark) {
+                btn.innerHTML = '<i class="fa-solid fa-sun text-lg text-amber-400"></i><span>Light Mode</span>';
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-moon text-lg"></i><span>Dark Mode</span>';
+            }
+
+            // Redraw charts with theme-appropriate styling
+            updateChartStyles(isDark);
+        }
+
+        function updateChartStyles(isDark) {
+            const gridColor = isDark ? '#1E293B' : '#E2E8F0';
+            const textColor = isDark ? '#94A3B8' : '#64748B';
+
+            // Helper to apply base theme configuration safely
+            const applyAxisTheme = (chart) => {
+                if (!chart) return;
+                if (!chart.options.scales) chart.options.scales = {};
+                
+                if (chart.options.scales.x) {
+                    if (!chart.options.scales.x.grid) chart.options.scales.x.grid = {};
+                    chart.options.scales.x.grid.color = gridColor;
+                    if (!chart.options.scales.x.ticks) chart.options.scales.x.ticks = {};
+                    chart.options.scales.x.ticks.color = textColor;
+                    if (chart.options.scales.x.title) chart.options.scales.x.title.color = isDark ? '#F1F5F9' : '#1E293B';
+                }
+                if (chart.options.scales.y) {
+                    if (!chart.options.scales.y.grid) chart.options.scales.y.grid = {};
+                    chart.options.scales.y.grid.color = gridColor;
+                    if (!chart.options.scales.y.ticks) chart.options.scales.y.ticks = {};
+                    chart.options.scales.y.ticks.color = textColor;
+                    if (chart.options.scales.y.title) chart.options.scales.y.title.color = isDark ? '#F1F5F9' : '#1E293B';
+                }
+                if (chart.options.plugins && chart.options.plugins.legend) {
+                    if (!chart.options.plugins.legend.labels) chart.options.plugins.legend.labels = {};
+                    chart.options.plugins.legend.labels.color = isDark ? '#F1F5F9' : '#1E293B';
+                }
+                chart.update();
+            };
+
+            applyAxisTheme(chartTopSectors);
+            applyAxisTheme(chartTopLeakages);
+            applyAxisTheme(chartOpportunityScatter);
+
+            if (chartDrilldownDoughnut) {
+                if (!chartDrilldownDoughnut.options.plugins) chartDrilldownDoughnut.options.plugins = {};
+                if (!chartDrilldownDoughnut.options.plugins.legend) chartDrilldownDoughnut.options.plugins.legend = {};
+                if (!chartDrilldownDoughnut.options.plugins.legend.labels) chartDrilldownDoughnut.options.plugins.legend.labels = {};
+                chartDrilldownDoughnut.options.plugins.legend.labels.color = isDark ? '#F1F5F9' : '#1E293B';
+                chartDrilldownDoughnut.update();
+            }
+        }
+
+        // Reset Dashboard
+        function resetDashboard() {
+            resetDirectoryFilters();
+            loadSectorIntoDeepDive('424210');
+            setCalculatorSector('424210');
+            switchTab('overview');
+        }
+
+        // Navigation Tabs Controller
+        function switchTab(tabId) {
+            currentTab = tabId;
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(el => el.classList.add('hidden'));
+
+            // Remove active style from all tabs
+            const tabs = document.querySelectorAll('[id^="tab-"]');
+            tabs.forEach(el => {
+                el.classList.remove('tab-active');
+                el.classList.add('theme-text-muted');
+            });
+
+            // Show active content
+            document.getElementById('content-' + tabId).classList.remove('hidden');
+
+            // Apply active class to tab button
+            document.getElementById('tab-' + tabId).classList.add('tab-active');
+            document.getElementById('tab-' + tabId).classList.remove('theme-text-muted');
+
+            // Workaround for Chart.js redrawing inside hidden elements
+            setTimeout(() => {
+                if (tabId === 'overview') {
+                    if (chartTopSectors) chartTopSectors.resize();
+                    if (chartTopLeakages) chartTopLeakages.resize();
+                    if (chartOverallDistribution) chartOverallDistribution.resize();
+                } else if (tabId === 'opportunity') {
+                    if (chartOpportunityScatter) chartOpportunityScatter.resize();
+                } else if (tabId === 'drilldown') {
+                    if (chartDrilldownDoughnut) chartDrilldownDoughnut.resize();
+                }
+            }, 50);
+        }
+
+        // Render Executive Overview Charts
+        function renderOverviewCharts() {
+            // Sort to get Top 10 by volume
+            const topSectors = [...allSectors]
+                .sort((a, b) => b.totalPurchases - a.totalPurchases)
+                .slice(0, 10);
+
+            // Labels with nice truncation
+            const labels = topSectors.map(s => {
+                const label = s.name;
+                return label.length > 25 ? s.naics + ' - ' + label.substring(0, 22) + '...' : s.naics + ' - ' + label;
+            });
+
+            const inRegionData = topSectors.map(s => s.inRegionPurchases);
+            const importedData = topSectors.map(s => s.importedPurchases);
+
+            // 1. Chart - Top 10 Sectors Stacked Bar Chart
+            const ctxTop = document.getElementById('chart-top-sectors').getContext('2d');
+            if (chartTopSectors) chartTopSectors.destroy();
+            chartTopSectors = new Chart(ctxTop, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Local Sourcing (In-Region)',
+                            data: inRegionData,
+                            backgroundColor: '#CFB991', // Purdue Gold
+                            borderColor: '#CFB991',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Import Sourcing Gaps (Leakage)',
+                            data: importedData,
+                            backgroundColor: '#1E293B', // Charcoal Slate
+                            borderColor: '#1E293B',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: { display: false },
+                            ticks: { font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        },
+                        y: {
+                            stacked: true,
+                            ticks: {
+                                font: { family: 'Plus Jakarta Sans', size: 10 },
+                                callback: function(value) { return formatCurrency(value); }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 12, font: { family: 'Plus Jakarta Sans', weight: '600', size: 11 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + formatFullCurrency(context.raw);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. Chart - Sourcing Leakages opportunity bar chart
+            const topImports = [...allSectors]
+                .sort((a, b) => b.importedPurchases - a.importedPurchases)
+                .slice(0, 10);
+
+            const importLabels = topImports.map(s => {
+                const label = s.name;
+                return label.length > 25 ? s.naics + ' - ' + label.substring(0, 22) + '...' : s.naics + ' - ' + label;
+            });
+            const importValues = topImports.map(s => s.importedPurchases);
+
+            const ctxImports = document.getElementById('chart-top-leakages').getContext('2d');
+            if (chartTopLeakages) chartTopLeakages.destroy();
+            chartTopLeakages = new Chart(ctxImports, {
+                type: 'bar',
+                data: {
+                    labels: importLabels,
+                    datasets: [
+                        {
+                            label: 'Import Sourcing Gap Value ($)',
+                            data: importValues,
+                            backgroundColor: 'rgba(239, 68, 68, 0.85)', // Rose/Red
+                            borderColor: 'rgb(239, 68, 68)',
+                            borderWidth: 1.5,
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: { family: 'Plus Jakarta Sans', size: 10 },
+                                callback: function(value) { return formatCurrency(value); }
+                            }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const index = context.dataIndex;
+                                    const pct = topImports[index].pctImported.toFixed(1);
+                                    return 'Leakage: ' + formatFullCurrency(context.raw) + ' (' + pct + '% of total)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 3. Chart - Sourcing Distribution Doughnut
+            const ctxDoughnut = document.getElementById('chart-overall-distribution').getContext('2d');
+            if (chartOverallDistribution) chartOverallDistribution.destroy();
+            chartOverallDistribution = new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Local (In-Region)', 'Imported (Leakage)'],
+                    datasets: [
+                        {
+                            data: [8337530922, 5364941565], // Lightcast Study Global values
+                            backgroundColor: ['#10B981', '#EF4444'], // Emerald and Rose
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data[0] + context.dataset.data[1];
+                                    const percentage = ((context.raw / total) * 100).toFixed(1);
+                                    return context.label + ': ' + formatCurrency(context.raw) + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    },
+                    cutout: '75%'
+                }
+            });
+        }
+
+        // Render Sourcing Gap Matrix Scatter Chart
+        function renderOpportunityChart() {
+            const scatterData = allSectors.map(s => {
+                return {
+                    x: s.totalPurchases,
+                    y: s.pctImported,
+                    // Bubble size mapped to imported purchases value
+                    r: Math.max(5, Math.min(25, (s.importedPurchases / 30000000))),
+                    naics: s.naics,
+                    name: s.name,
+                    importedPurchases: s.importedPurchases,
+                    totalPurchases: s.totalPurchases
+                };
+            });
+
+            const ctxScatter = document.getElementById('chart-opportunity-scatter').getContext('2d');
+            if (chartOpportunityScatter) chartOpportunityScatter.destroy();
+
+            // Background color quadrants configuration inside ChartJS plugin
+            const quadrantBackgroundPlugin = {
+                id: 'quadrantBackground',
+                beforeDraw(chart, args, options) {
+                    const {ctx, chartArea: {top, bottom, left, right, width, height}, scales: {x, y}} = chart;
+                    
+                    // Midpoints
+                    const midY = y.getPixelForValue(50);
+                    // Standard linear midpoint or logarithmic midpoint
+                    const midX = x.getPixelForValue(50000000); // SBDC threshold $50M
+
+                    ctx.save();
+                    
+                    // Quadrant I: Goldmine (Top Right)
+                    ctx.fillStyle = 'rgba(239, 68, 68, 0.03)';
+                    ctx.fillRect(midX, top, right - midX, midY - top);
+
+                    // Quadrant II: Local Powerhouses (Bottom Right)
+                    ctx.fillStyle = 'rgba(16, 185, 129, 0.03)';
+                    ctx.fillRect(midX, midY, right - midX, bottom - midY);
+
+                    // Quadrant III: Specialized Imports (Top Left)
+                    ctx.fillStyle = 'rgba(245, 158, 11, 0.03)';
+                    ctx.fillRect(left, top, midX - left, midY - top);
+
+                    // Quadrant IV: Local Champions (Bottom Left)
+                    ctx.fillStyle = 'rgba(100, 116, 139, 0.03)';
+                    ctx.fillRect(left, midY, midX - left, bottom - midY);
+
+                    // Draw Quadrant boundary divider lines
+                    ctx.strokeStyle = 'rgba(203, 213, 225, 0.6)';
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([5, 5]);
+                    
+                    // Horizontal separator (50% imports)
+                    ctx.beginPath();
+                    ctx.moveTo(left, midY);
+                    ctx.lineTo(right, midY);
+                    ctx.stroke();
+
+                    // Vertical separator ($50M total demand)
+                    ctx.beginPath();
+                    ctx.moveTo(midX, top);
+                    ctx.lineTo(midX, bottom);
+                    ctx.stroke();
+
+                    ctx.restore();
+                }
+            };
+
+            chartOpportunityScatter = new Chart(ctxScatter, {
+                type: 'bubble',
+                data: {
+                    datasets: [{
+                        label: 'Sourcing Sectors Matrix',
+                        data: scatterData,
+                        backgroundColor: function(context) {
+                            const raw = context.raw;
+                            if (!raw) return 'rgba(100, 116, 139, 0.6)';
+                            
+                            // Color based on quadrants
+                            if (raw.totalPurchases >= 50000000 && raw.y >= 50) {
+                                return 'rgba(239, 68, 68, 0.7)'; // Quadrant I (Red - Leakage Goldmine)
+                            } else if (raw.totalPurchases >= 50000000 && raw.y < 50) {
+                                return 'rgba(16, 185, 129, 0.7)'; // Quadrant II (Green - Local Strongholds)
+                            } else if (raw.totalPurchases < 50000000 && raw.y >= 50) {
+                                return 'rgba(245, 158, 11, 0.7)'; // Quadrant III (Amber - Specialized Imports)
+                            } else {
+                                return 'rgba(100, 116, 139, 0.6)'; // Quadrant IV (Gray)
+                            }
+                        },
+                        borderColor: function(context) {
+                            const raw = context.raw;
+                            if (!raw) return 'rgb(100, 116, 139)';
+                            if (raw.totalPurchases >= 50000000 && raw.y >= 50) return 'rgb(220, 38, 38)';
+                            if (raw.totalPurchases >= 50000000 && raw.y < 50) return 'rgb(5, 150, 105)';
+                            if (raw.totalPurchases < 50000000 && raw.y >= 50) return 'rgb(217, 119, 6)';
+                            return 'rgb(71, 85, 105)';
+                        },
+                        borderWidth: 1.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: scatterScale,
+                            title: {
+                                display: true,
+                                text: 'Total Sourcing Procurement ($ Volume)',
+                                font: { family: 'Plus Jakarta Sans', weight: '700', size: 11 }
+                            },
+                            ticks: {
+                                font: { family: 'Plus Jakarta Sans', size: 10 },
+                                callback: function(value) {
+                                    if (value >= 1e9) return '$' + (value/1e9).toFixed(1) + 'B';
+                                    if (value >= 1e6) return '$' + (value/1e6).toFixed(0) + 'M';
+                                    if (value >= 1e3) return '$' + (value/1e3).toFixed(0) + 'k';
+                                    return '$' + value;
+                                }
+                            },
+                            min: scatterScale === 'logarithmic' ? 1000000 : 0 // avoid zero on log scale
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Sourcing Import Dependency (%)',
+                                font: { family: 'Plus Jakarta Sans', weight: '700', size: 11 }
+                            },
+                            ticks: {
+                                font: { family: 'Plus Jakarta Sans', size: 10 },
+                                callback: function(value) { return value + '%'; }
+                            },
+                            min: 0,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const raw = context.raw;
+                                    return [
+                                        `NAICS ${raw.naics}: ${raw.name}`,
+                                        `Total Purchases: ${formatFullCurrency(raw.totalPurchases)}`,
+                                        `Imported Purchases: ${formatFullCurrency(raw.importedPurchases)}`,
+                                        `Import Dependency Rate: ${raw.y.toFixed(1)}%`
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [quadrantBackgroundPlugin]
+            });
+        }
+
+        // Toggle opportunity scatter plot logarithmic / linear scales
+        function toggleScatterScale(scaleType) {
+            scatterScale = scaleType;
+            if (scaleType === 'logarithmic') {
+                document.getElementById('btn-scale-log').className = "bg-purdueGoldDark text-slate-900 font-bold px-3 py-1 text-xs rounded border border-purdueGoldDark shadow-sm";
+                document.getElementById('btn-scale-lin').className = "bg-white hover:bg-slate-50 text-slate-700 font-semibold px-3 py-1 text-xs rounded border border-slate-200 shadow-sm";
+            } else {
+                document.getElementById('btn-scale-lin').className = "bg-purdueGoldDark text-slate-900 font-bold px-3 py-1 text-xs rounded border border-purdueGoldDark shadow-sm";
+                document.getElementById('btn-scale-log').className = "bg-white hover:bg-slate-50 text-slate-700 font-semibold px-3 py-1 text-xs rounded border border-slate-200 shadow-sm";
+            }
+            renderOpportunityChart();
+        }
+
+        // Populate Priority Target list (Quadrant I Goldmines)
+        function populateGoldmineTable() {
+            // Filter list to Quadrant I targets: Total Purchases >= $50M & Import % >= 50%
+            const targets = allSectors
+                .filter(s => s.totalPurchases >= 50000000 && s.pctImported >= 50)
+                .sort((a, b) => b.importedPurchases - a.importedPurchases);
+
+            const tbody = document.getElementById('goldmine-table-rows');
+            tbody.innerHTML = '';
+
+            targets.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-4 py-3.5"><span class="bg-slate-100 dark:bg-slate-800 font-mono text-slate-700 dark:text-slate-300 font-bold px-2 py-0.5 rounded text-xs">${s.naics}</span></td>
+                    <td class="px-4 py-3.5 font-semibold text-slate-900 dark:text-slate-100">${s.name}</td>
+                    <td class="px-4 py-3.5 text-right">${formatFullCurrency(s.totalPurchases)}</td>
+                    <td class="px-4 py-3.5 text-right font-extrabold text-red-600">${formatFullCurrency(s.importedPurchases)}</td>
+                    <td class="px-4 py-3.5 text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <span class="font-bold">${s.pctImported.toFixed(1)}%</span>
+                            <div class="w-16 bg-slate-100 dark:bg-slate-800 rounded-full h-2">
+                                <div class="bg-red-500 h-2 rounded-full" style="width: ${s.pctImported}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3.5 text-center">
+                        <button onclick="loadSectorIntoDeepDive('${s.naics}'); switchTab('drilldown')" class="bg-slate-800 hover:bg-purdueGoldDark hover:text-slate-900 text-slate-200 text-xs px-2.5 py-1 rounded transition-all flex items-center justify-center space-x-1 mx-auto font-bold">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <span>Analyze</span>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Export Quadrant I Goldmines directly to CSV from browser
+        function exportGoldmineToCSV() {
+            const targets = allSectors
+                .filter(s => s.totalPurchases >= 50000000 && s.pctImported >= 50)
+                .sort((a, b) => b.importedPurchases - a.importedPurchases);
+
+            let csvContent = "data:text/csv;charset=utf-8,NAICS,Industry,Total Purchases,Imported Purchases,Import Percent\n";
+            targets.forEach(s => {
+                csvContent += `"${s.naics}","${s.name.replace(/"/g, '""')}",${s.totalPurchases},${s.importedPurchases},${s.pctImported}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "SBDC_Quadrant_I_Sourcing_Goldmines.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Search and Select sector in Deep-Dive
+        function populateDropdowns() {
+            // Sort by name for dropdown
+            const sortedSectors = [...allSectors].sort((a, b) => a.name.localeCompare(b.name));
+            
+            // 1. Sector Deep Dive Dropdown
+            const resultsDiv = document.getElementById('deep-dive-results');
+            resultsDiv.innerHTML = '';
+            
+            // 2. Calculator Sourcing Dropdown
+            const calcDiv = document.getElementById('calc-results');
+            calcDiv.innerHTML = '';
+
+            sortedSectors.forEach(s => {
+                // Deep dive elements
+                const div = document.createElement('div');
+                div.className = "px-4 py-2 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 cursor-pointer border-b theme-border flex justify-between items-center";
+                div.innerHTML = `
+                    <span class="truncate pr-4">${s.name}</span>
+                    <span class="bg-slate-100 dark:bg-slate-800 font-mono text-[10px] text-slate-500 dark:text-slate-400 font-bold px-1.5 py-0.5 rounded shrink-0">${s.naics}</span>
+                `;
+                div.onclick = () => selectSectorInDeepDive(s.naics);
+                resultsDiv.appendChild(div);
+
+                // Calculator elements
+                const calcRow = document.createElement('div');
+                calcRow.className = "px-4 py-2 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 cursor-pointer border-b theme-border flex justify-between items-center";
+                calcRow.innerHTML = `
+                    <span class="truncate pr-4">${s.name}</span>
+                    <span class="bg-slate-100 dark:bg-slate-800 font-mono text-[10px] text-slate-500 dark:text-slate-400 font-bold px-1.5 py-0.5 rounded shrink-0">${s.naics}</span>
+                `;
+                calcRow.onclick = () => selectSectorInCalculator(s.naics);
+                calcDiv.appendChild(calcRow);
+            });
+        }
+
+        function showDeepDiveDropdown() {
+            document.getElementById('deep-dive-results').classList.remove('hidden');
+        }
+
+        function filterDeepDiveDropdown() {
+            const val = document.getElementById('deep-dive-search').value.toLowerCase();
+            const results = document.getElementById('deep-dive-results');
+            results.classList.remove('hidden');
+
+            const rows = results.querySelectorAll('div');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                if (text.includes(val)) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        }
+
+        function selectSectorInDeepDive(naics) {
+            loadSectorIntoDeepDive(naics);
+            document.getElementById('deep-dive-results').classList.add('hidden');
+            document.getElementById('deep-dive-search').value = '';
+            switchTab('drilldown');
+        }
+
+        // Load targeted Sector details into drilldown tab
+        function loadSectorIntoDeepDive(naics) {
+            const sector = allSectors.find(s => s.naics === naics);
+            if (!sector) return;
+
+            document.getElementById('dd-naics').innerText = sector.naics;
+            document.getElementById('dd-name').innerText = sector.name;
+            document.getElementById('dd-total').innerText = formatFullCurrency(sector.totalPurchases);
+            document.getElementById('dd-inregion').innerText = formatFullCurrency(sector.inRegionPurchases) + ' (' + sector.pctInRegion.toFixed(1) + '%)';
+            document.getElementById('dd-imported').innerText = formatFullCurrency(sector.importedPurchases) + ' (' + sector.pctImported.toFixed(1) + '%)';
+
+            // Set up rating badges
+            const priorityBadge = document.getElementById('dd-priority');
+            if (sector.totalPurchases >= 50000000 && sector.pctImported >= 50) {
+                priorityBadge.className = "px-4 py-2 rounded-full text-sm font-semibold bg-red-100 text-red-800 border border-red-300";
+                priorityBadge.innerText = "CRITICAL IMPORT LEAKAGE (SBDC PRIORITY 1)";
+            } else if (sector.importedPurchases >= 10000000 && sector.pctImported >= 30) {
+                priorityBadge.className = "px-4 py-2 rounded-full text-sm font-semibold bg-amber-100 text-amber-800 border border-amber-300";
+                priorityBadge.innerText = "HIGH SOURCING LEAKAGE (SBDC PRIORITY 2)";
+            } else if (sector.importedPurchases >= 1000000) {
+                priorityBadge.className = "px-4 py-2 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 border border-blue-300";
+                priorityBadge.innerText = "MODERATE OPPORTUNITY (SBDC PRIORITY 3)";
+            } else {
+                priorityBadge.className = "px-4 py-2 rounded-full text-sm font-semibold bg-slate-100 text-slate-800 border border-slate-300";
+                priorityBadge.innerText = "MONITOR / LOW LEAKAGE OPPORTUNITY";
+            }
+
+            // Update doughnut chart
+            updateDrilldownDoughnut(sector);
+
+            // Update benchmarking indicator
+            updateBenchmarking(sector);
+            
+            // Populate Advisor Playbook
+            updateAdvisorPlaybook(sector);
+        }
+
+        function loadRandomSector() {
+            const index = Math.floor(Math.random() * allSectors.length);
+            loadSectorIntoDeepDive(allSectors[index].naics);
+        }
+
+        function updateDrilldownDoughnut(sector) {
+            const ctx = document.getElementById('chart-drilldown-doughnut').getContext('2d');
+            if (chartDrilldownDoughnut) chartDrilldownDoughnut.destroy();
+
+            const isDark = document.body.classList.contains('dark-theme');
+
+            chartDrilldownDoughnut = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Local Sourced', 'Imported Sourced'],
+                    datasets: [{
+                        data: [sector.inRegionPurchases, sector.importedPurchases],
+                        backgroundColor: ['#10B981', '#EF4444'], // Emerald and Rose
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'bottom', 
+                            labels: { 
+                                color: isDark ? '#F1F5F9' : '#1E293B',
+                                font: { family: 'Plus Jakarta Sans', weight: '600', size: 11 } 
+                            } 
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data[0] + context.dataset.data[1];
+                                    const percentage = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
+                                    return context.label + ': ' + formatFullCurrency(context.raw) + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        function updateBenchmarking(sector) {
+            const sectorPct = sector.pctImported;
+            document.getElementById('dd-benchmark-sector-pct').innerText = sectorPct.toFixed(1) + '%';
+            
+            const sectorBar = document.getElementById('dd-benchmark-sector-bar');
+            sectorBar.style.width = sectorPct + '%';
+
+            // Change progress bar color based on relationship to cluster average
+            const diff = sectorPct - 39.15;
+            const verdict = document.getElementById('dd-benchmark-verdict');
+
+            if (diff > 15) {
+                sectorBar.className = "bg-red-500 h-3 rounded-full";
+                verdict.innerHTML = `This sector is <strong>highly import-dependent</strong> compared to the regional average by <strong>+${diff.toFixed(1)}%</strong>. This represents a significant sourcing gap that is highly vulnerable to supply chain disruptions outside Indiana.`;
+            } else if (diff > 0) {
+                sectorBar.className = "bg-orange-500 h-3 rounded-full";
+                verdict.innerHTML = `This sector has an import dependency <strong>higher than the average</strong> by <strong>+${diff.toFixed(1)}%</strong>. SBDC advisors should recommend exploring local partnerships.`;
+            } else {
+                sectorBar.className = "bg-emerald-500 h-3 rounded-full";
+                verdict.innerHTML = `This sector is <strong>performing extremely well</strong> with import dependency <strong>${Math.abs(diff).toFixed(1)}% lower</strong> than the regional average. This local strong sector can be leveraged for expansion or as a local sourcing supplier hub!`;
+            }
+        }
+
+        // Custom SBDC Sourcing Advisor Playbook based on sector size
+        function updateAdvisorPlaybook(sector) {
+            const name = sector.name;
+            const imported = sector.importedPurchases;
+            
+            // Matchmaking text
+            const pm1 = document.getElementById('dd-play-1');
+            const pm2 = document.getElementById('dd-play-2');
+            const pm3 = document.getElementById('dd-play-3');
+
+            if (imported > 50000000) {
+                pm1.innerHTML = `Target local supply chain matching inside SBDC's database. Create speed-dating supplier forums with major healthcare purchasing buyers and local suppliers for <strong>${name}</strong>.`;
+                pm2.innerHTML = `Request a customized technical review with <strong>Purdue MEP</strong> to evaluate the industrial scaling viability of local machine shops, chemical blenders, or logistics firms to satisfy this huge $${(imported/1e6).toFixed(1)}M sourcing gap.`;
+                pm3.innerHTML = `Provide regional economic development boards with this specific leakage gap report ($${(imported/1e6).toFixed(1)}M) to use as strong financial proof to attract high-tier biomedical vendors directly to relocate to Central Indiana SBDC districts.`;
+            } else if (imported > 5000000) {
+                pm1.innerHTML = `Introduce standard supplier directory networking. Set up meetings with 3 prominent regional clinics/laboratories to advocate local purchasing agreements for <strong>${name}</strong>.`;
+                pm2.innerHTML = `Encourage regional small businesses to apply for Purdue manufacturing development assistance to meet strict biomedical quality audits and certifications.`;
+                pm3.innerHTML = `Coordinate with regional business incubators and co-working spaces to identify local startups or spin-offs focused on localizing these medium-range medical supplier niches.`;
+            } else {
+                pm1.innerHTML = `Low-priority leakage. Focus efforts on higher volume sectors unless a specialized local business specifically requests supplier matching support for <strong>${name}</strong>.`;
+                pm2.innerHTML = `Offer standard business optimization packages. Suggest standard operational reviews to keep local firms competitive against low-cost outside importers.`;
+                pm3.innerHTML = `Maintain monitoring status. Ensure any emerging local supplier networks are listed on Indiana's main business directory portals.`;
+            }
+        }
+
+        // TAB: DATA DIRECTORY TABLE LOGIC
+        function applyFilters() {
+            const searchVal = document.getElementById('dir-search').value.toLowerCase();
+            const profileVal = document.getElementById('dir-filter-profile').value;
+            const sizeVal = document.getElementById('dir-filter-size').value;
+
+            filteredSectors = allSectors.filter(s => {
+                // 1. Keyword search (NAICS or name)
+                const matchesKeyword = s.naics.toLowerCase().includes(searchVal) || s.name.toLowerCase().includes(searchVal);
+                
+                // 2. Profile Sourcing filter
+                let matchesProfile = true;
+                if (profileVal === 'leakage') {
+                    matchesProfile = s.pctImported >= 50;
+                } else if (profileVal === 'balanced') {
+                    matchesProfile = s.pctImported >= 10 && s.pctImported < 50;
+                } else if (profileVal === 'local') {
+                    matchesProfile = s.pctImported < 10;
+                }
+
+                // 3. Procurement Size Filter
+                let matchesSize = true;
+                if (sizeVal === 'giant') {
+                    matchesSize = s.totalPurchases >= 100000000;
+                } else if (sizeVal === 'large') {
+                    matchesSize = s.totalPurchases >= 50000000 && s.totalPurchases < 100000000;
+                } else if (sizeVal === 'medium') {
+                    matchesSize = s.totalPurchases >= 10000000 && s.totalPurchases < 50000000;
+                } else if (sizeVal === 'small') {
+                    matchesSize = s.totalPurchases < 10000000;
+                }
+
+                return matchesKeyword && matchesProfile && matchesSize;
+            });
+
+            // Return to page 1 after filters change
+            currentPage = 1;
+            
+            // Sort, Render and draw table
+            sortAndRenderTable();
+        }
+
+        function resetDirectoryFilters() {
+            document.getElementById('dir-search').value = '';
+            document.getElementById('dir-filter-profile').value = 'all';
+            document.getElementById('dir-filter-size').value = 'all';
+            applyFilters();
+        }
+
+        // Sorting Logic
+        function setSort(column) {
+            if (sortColumn === column) {
+                // toggle direction
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'desc'; // default is desc for easier identification of top values
+            }
+            updateSortIcons();
+            sortAndRenderTable();
+        }
+
+        function updateSortIcons() {
+            const columns = ['naics', 'name', 'inRegionPurchases', 'pctInRegion', 'importedPurchases', 'pctImported', 'totalPurchases'];
+            columns.forEach(col => {
+                const el = document.getElementById('sort-icon-' + col);
+                if (!el) return;
+                if (col === sortColumn) {
+                    el.innerHTML = sortDirection === 'asc' ? '<i class="fa-solid fa-sort-up text-purdueGoldDark"></i>' : '<i class="fa-solid fa-sort-down text-purdueGoldDark"></i>';
+                } else {
+                    el.innerHTML = '<i class="fa-solid fa-sort text-slate-300"></i>';
+                }
+            });
+        }
+
+        function sortAndRenderTable() {
+            filteredSectors.sort((a, b) => {
+                let valA = a[sortColumn];
+                let valB = b[sortColumn];
+
+                // handle text vs numbers
+                if (typeof valA === 'string') {
+                    return sortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                } else {
+                    return sortDirection === 'asc' ? valA - valB : valB - valA;
+                }
+            });
+
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('directory-table-rows');
+            tbody.innerHTML = '';
+
+            const totalRows = filteredSectors.length;
+            const startIdx = (currentPage - 1) * pageSize;
+            const endIdx = Math.min(startIdx + pageSize, totalRows);
+
+            // Update Counter
+            if (totalRows === 0) {
+                document.getElementById('table-results-counter').innerText = 'Showing 0-0 of 0 sectors';
+            } else {
+                document.getElementById('table-results-counter').innerText = `Showing ${startIdx + 1}-${endIdx} of ${totalRows} sectors`;
+            }
+
+            const pageRows = filteredSectors.slice(startIdx, endIdx);
+
+            pageRows.forEach(s => {
+                // Sourcing Badges configuration
+                let badgeClass = "bg-slate-100 text-slate-700 border-slate-200";
+                if (s.pctImported >= 50) {
+                    badgeClass = "bg-red-50 text-red-700 border-red-200";
+                } else if (s.pctImported < 10) {
+                    badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "theme-table-row border-b theme-border";
+                tr.innerHTML = `
+                    <td class="px-4 py-3"><span class="bg-slate-100 dark:bg-slate-800 font-mono text-slate-700 dark:text-slate-300 font-bold px-1.5 py-0.5 rounded text-xs">${s.naics}</span></td>
+                    <td class="px-4 py-3 font-semibold text-slate-900 dark:text-slate-100 max-w-xs truncate" title="${s.name}">${s.name}</td>
+                    <td class="px-4 py-3 text-right">${formatCurrency(s.inRegionPurchases)}</td>
+                    <td class="px-3 py-3 text-center font-bold text-emerald-600">${s.pctInRegion.toFixed(1)}%</td>
+                    <td class="px-4 py-3 text-right">${formatCurrency(s.importedPurchases)}</td>
+                    <td class="px-3 py-3 text-center font-bold text-red-600">
+                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold border ${badgeClass}">${s.pctImported.toFixed(1)}%</span>
+                    </td>
+                    <td class="px-4 py-3 text-right font-extrabold text-slate-900 dark:text-slate-100">${formatCurrency(s.totalPurchases)}</td>
+                    <td class="px-4 py-3 text-center">
+                        <button onclick="loadSectorIntoDeepDive('${s.naics}'); switchTab('drilldown')" class="bg-slate-800 hover:bg-purdueGoldDark hover:text-slate-900 text-slate-200 text-xs px-2.5 py-1 rounded transition-all flex items-center justify-center space-x-1 mx-auto font-bold">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <span>Analyze</span>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            renderPagination();
+        }
+
+        // Pagination rendering and logic
+        function renderPagination() {
+            const totalRows = filteredSectors.length;
+            const totalPages = Math.ceil(totalRows / pageSize);
+
+            document.getElementById('btn-page-prev').disabled = currentPage === 1;
+            document.getElementById('btn-page-next').disabled = currentPage === totalPages || totalPages === 0;
+
+            const pagesContainer = document.getElementById('table-pagination-pages');
+            pagesContainer.innerHTML = '';
+
+            // Generate page numbers range (showing max 5 buttons)
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                if (i <= 0) continue;
+                const btn = document.createElement('button');
+                btn.className = `px-3 py-1.5 rounded-lg border font-semibold ${currentPage === i ? 'bg-purdueGoldDark border-purdueGoldDark text-slate-900' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'}`;
+                btn.innerText = i;
+                btn.onclick = () => {
+                    currentPage = i;
+                    renderTable();
+                };
+                pagesContainer.appendChild(btn);
+            }
+        }
+
+        function changePage(direction) {
+            currentPage += direction;
+            renderTable();
+        }
+
+        function changePageSize(size) {
+            pageSize = parseInt(size);
+            currentPage = 1;
+            renderTable();
+        }
+
+        // Export All Active Filtered Rows in directory
+        function exportAllFilteredToCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,NAICS,Industry,In-region Purchases,% In-region,Imported Purchases,% Imported,Total Purchases\n";
+            filteredSectors.forEach(s => {
+                csvContent += `"${s.naics}","${s.name.replace(/"/g, '""')}",${s.inRegionPurchases},${s.pctInRegion.toFixed(1)},${s.importedPurchases},${s.pctImported.toFixed(1)},${s.totalPurchases}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            const safeName = "SBDC_PCRD_Lightcast_Data_Extract.csv";
+            link.setAttribute("download", safeName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // TAB: SOURCING SAVINGS CALCULATOR LOGIC
+        function showCalcDropdown() {
+            document.getElementById('calc-results').classList.remove('hidden');
+        }
+
+        // Filter the dropdown list of sectors in calculation tab
+        function filterCalcDropdown() {
+            const val = document.getElementById('calc-search').value.toLowerCase();
+            const results = document.getElementById('calc-results');
+            results.classList.remove('hidden');
+
+            const rows = results.querySelectorAll('div');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                if (text.includes(val)) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        }
+
+        function selectSectorInCalculator(naics) {
+            setCalculatorSector(naics);
+            document.getElementById('calc-results').classList.add('hidden');
+            document.getElementById('calc-search').value = '';
+        }
+
+        function setCalculatorSector(naics) {
+            const sector = allSectors.find(s => s.naics === naics);
+            if (!sector) return;
+
+            calcSelectedSector = sector;
+            document.getElementById('calc-selected-sector').innerText = `${sector.name} (${sector.naics})`;
+            document.getElementById('calc-selected-gap').innerText = `${formatCurrency(sector.importedPurchases)} (${sector.pctImported.toFixed(1)}% Imported)`;
+            
+            // Set dynamic text fields inside impact assessment
+            document.getElementById('calc-impact-sector-name').innerText = sector.name;
+
+            calculateSavings();
+        }
+
+        function updateSavingsPctLabel(val) {
+            document.getElementById('calc-savings-label').innerText = `${val}% Savings`;
+        }
+
+        function calculateSavings() {
+            if (!calcSelectedSector) return;
+
+            const spend = parseFloat(document.getElementById('calc-spend').value) || 0;
+            const savingsPct = parseFloat(document.getElementById('calc-savings-pct').value) || 0;
+
+            // Direct Savings
+            const savingsVal = spend * (savingsPct / 100);
+            
+            // Injected dollars into local economy (assuming spending shifts to local)
+            const localInjection = spend;
+
+            document.getElementById('calc-out-savings').innerText = formatFullCurrency(savingsVal);
+            document.getElementById('calc-out-local-injection').innerText = formatFullCurrency(localInjection);
+
+            // Calculate percentage of absolute regional leakage recovered
+            let leakagePct = 0;
+            if (calcSelectedSector.importedPurchases > 0) {
+                leakagePct = (spend / calcSelectedSector.importedPurchases) * 100;
+            }
+            document.getElementById('calc-impact-percent-of-leakage').innerText = leakagePct.toFixed(3) + '%';
+
+            // Jobs Sustained Estimation (1 job sustained per $150,000 of local injection in Biotech/Health supply chains)
+            const jobsSustained = Math.round(localInjection / 150000);
+            document.getElementById('calc-impact-jobs').innerText = Math.max(1, jobsSustained).toLocaleString();
+        }
+
+        function downloadSavingsReport() {
+            window.print(); // Easy, elegant, and native PDF printing/report download solution!
+        }
+    </script>
+</body>
+</html>
