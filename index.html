@@ -20,6 +20,7 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-6">
     <div class="max-w-7xl mx-auto space-y-6">
+        <!-- Header -->
         <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-white">SBDC Industry Supply Chain</h1>
@@ -61,6 +62,7 @@
             </div>
         </div>
 
+        <!-- KPI Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-lg">
                 <h3 class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Purchases</h3>
@@ -76,11 +78,13 @@
             </div>
         </div>
 
+        <!-- Plotly Chart -->
         <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl">
             <h2 class="text-lg font-bold text-white mb-2">Top 10 Supply Chain Industries by Total Purchases</h2>
             <div id="barChart" class="w-full h-80"></div>
         </div>
 
+        <!-- DataTable -->
         <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl overflow-hidden">
             <table id="supplyTable" class="w-full text-left text-sm pt-4">
                 <thead>
@@ -121,19 +125,16 @@
                 const region = $('#regionFilter').val();
                 const cluster = $('#clusterFilter').val();
                 
-                // Construct path to small file
-                const filepath = `data/${region}_${cluster}.json`;
+                // FIXED relative path for GitHub Pages deployment
+                const filepath = `./data/${region}_${cluster}.json`;
 
                 try {
                     const response = await fetch(filepath);
                     if (!response.ok) throw new Error('File not found');
                     const data = await response.json();
-                    
-                    // Populate Dashboard
                     updateDashboard(data);
                 } catch (err) {
                     console.error('Error loading data:', err);
-                    // Clear dashboard on failure
                     dataTable.clear().draw();
                     $('#kpiTotal, #kpiInRegion, #kpiImported').text('$0');
                 }
@@ -172,7 +173,7 @@
             }
 
             $('#regionFilter, #clusterFilter').on('change', fetchAndLoadData);
-            fetchAndLoadData(); // Initial load
+            fetchAndLoadData(); // Initial bootstrap load
         });
     </script>
 </body>
